@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from 'react-redux';
-import { changeFilters } from '../../redux/store';
+import { changeFilters } from '../../redux/filtersSlice';
 import css from "./SearchBox.module.css";
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';

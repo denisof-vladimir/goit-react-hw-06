@@ -1,49 +1,47 @@
+import { configureStore } from '@reduxjs/toolkit';
 
-import InitPhoneBook from "../components/App/PhoneBook.json";
+import {
+  persistStore,
+  persistReducer,
+  FLUSH,
+  REHYDRATE,
+  PAUSE,
+  PERSIST,
+  PURGE,
+  REGISTER,
+} from 'redux-persist';
+import storage from 'redux-persist/lib/storage';
+import filterSliceReducer from "./filtersSlice";
+import contactSliceReducer from "./contactsSlice";
+// import InitPhoneBook from "../components/App/PhoneBook.json";
 
-import { configureStore, createAction } from '@reduxjs/toolkit';
+const persistedContactReducer = persistReducer(
+  {
+    key: "contacts",
+    storage,
+  },
+    contactSliceReducer
+  );
 
-const initialState = {
-  contacts: { items : InitPhoneBook },
-  filters:  { name: ""  },
-  };
+const persistedFilterReducer = persistReducer(
+    {
+      key: "filters",
+      storage,
+    },
+   filterSliceReducer
+  );
 
-const rootReducer = (state = initialState, action) => {
-  console.log("action.payload", action);
-  switch (action.type) {
-    case 'contacts/addContact':
-      return {
-        ...state,
-        contacts: {
-          items: [...state.contacts.items, action.payload],
+  export const store = configureStore({
+    reducer: {
+      contacts: persistedContactReducer,
+      filters: persistedFilterReducer,
+    },
+    middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware({
+        serializableCheck: {
+          ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
         },
-      };
-    case 'contacts/deleteContact':
-      return {
-        ...state,
-        contacts: {
-          items: state.contacts.items.filter((contact) => contact.id !== action.payload.id),
-        },
-      };
-
-    case 'filters/changeFilters':
-      return {
-        ...state,
-        filters: {
-          name: action.payload,
-        },
-      };
-
-    default:
-      return state;
-  }
-};
-
-export const store = configureStore({
-  reducer: rootReducer,
-});
-
-export const addContact = createAction('contacts/addContact');
-
-export const changeFilters = createAction('filters/changeFilters');
-export const deleteContact = createAction('contacts/deleteContact');    
+      }),
+  });
+  
+  export const persistor = persistStore(store);
